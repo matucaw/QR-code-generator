@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gerar ou Ler um QR Code</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f0f4f9;
+      text-align: center;
+      margin: 0;
+      padding: 20px;
+    }
+    h1 { color: #2c3e50; margin-bottom: 20px; }
+    .menu, .gerar, .ler { display: none; }
+    .ativo { display: block; }
+    .card {
+      background: white;
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+      display: inline-block;
+      margin: 20px auto;
+      width: 90%;
+      max-width: 400px;
+      box-sizing: border-box;
+    }
+    input, button {
+      margin: 10px 0;
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      width: 95%;
+      box-sizing: border-box;
+      font-size: 16px;
+    }
+    button {
+      cursor: pointer;
+      background: #3498db;
+      color: white;
+      border: none;
+      transition: 0.3s;
+    }
+    button:hover { background: #2980b9; }
+    #qrcode, #resultado { margin-top: 20px; }
+    #resultado {
+      font-weight: bold;
+      font-size: 18px;
+      color: #333;
+      word-wrap: break-word;
+    }
+    @media (max-width: 480px) {
+      .card { padding: 15px; }
+      input, button { font-size: 18px; padding: 14px; }
+      #qrcode img { width: 90% !important; height: auto !important; }
+    }
+  </style>
+</head>
+<body>
+
+<h1>Gerar ou Ler um QR Code</h1>
+
+<div class="menu ativo">
+  <div class="card">
+    <h2>O que deseja fazer?</h2>
+    <button onclick="mostrar('gerar')">Gerar QR Code</button>
+    <button onclick="mostrar('ler')">Ler QR Code</button>
+  </div>
+</div>
+
+<div class="gerar">
+  <div class="card">
+    <h2>Gerar QR Code</h2>
+    <input type="text" id="texto" placeholder="Digite texto ou URL">
+    <br>
+    <button onclick="gerarQRCode()">Gerar</button>
+    <div id="qrcode"></div>
+    <a id="download" style="display:none;" download="qrcode.png">📥 Baixar QR Code</a>
+    <br><br>
+    <button onclick="voltar()">⬅ Voltar</button>
+  </div>
+</div>
+
+<div class="ler">
+  <div class="card">
+    <h2>Ler QR Code</h2>
+    <input type="file" id="arquivo" accept="image/*">
+    <div id="resultado"></div>
+    <br>
+    <button onclick="voltar()">⬅ Voltar</button>
+  </div>
+</div>
+
+<script>
+function mostrar(secao) {
+  document.querySelector(".menu").classList.remove("ativo");
+  document.querySelector(".gerar").classList.remove("ativo");
+  document.querySelector(".ler").classList.remove("ativo");
+  document.querySelector("." + secao).classList.add("ativo");
+}
+
+function voltar() {
+  document.getElementById("resultado").innerText = "";
+  mostrar('menu');
+}
+
+function gerarQRCode() {
+  let texto = document.getElementById("texto").value;
+  // Permitir apenas os caracteres da lista fornecida, incluindo , e .
+  const permitido = /^[qwertyuiopasdfghjklzxcvbnm1234567890@#$_&\-+()\/\*"'`:;!?~`|•√π÷×§∆£¢€¥^°={}%©®™✓[\].,\\]*$/i;
+  if (!permitido.test(texto)) {
+    alert("⚠ Caractere inválido! Use apenas os permitidos na lista.");
+    return;
+  }
+
+  document.getElementById("qrcode").innerHTML = "";
+  new QRCode(document.getElementById("qrcode"), { text: texto, width: 250, height: 250 });
+
+  setTimeout(() => {
+    let img = document.querySelector("#qrcode img");
+    if (img) {
+      let link = document.getElementById("download");
+      link.href = img.src;
+      link.style.display = "block";
+    }
+  }, 500);
+}
+
+// Ler QR code via arquivo
+document.getElementById("arquivo").addEventListener("change", function(){
+  let file = this.files[0];
+  if (!file) return;
+  let reader = new FileReader();
+  reader.onload = function() {
+    let img = new Image();
+    img.onload = function() {
+      let canvas = document.createElement("canvas");
+      canvas.width = img.width;
+      canvas.height = img.height;
+      let ctx = canvas.getContext("2d");
+      ctx.drawImage(img, 0, 0);
+      let imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      let code = jsQR(imageData.data, canvas.width, canvas.height);
+      if (code) {
+        document.getElementById("resultado").innerText = "📌 Resultado: " + code.data;
+      } else {
+        document.getElementById("resultado").innerText = "❌ Nenhum QR Code encontrado.";
+      }
+    }
+    img.src = reader.result;
+  }
+  reader.readAsDataURL(file);
+});
+</script>
+
+</body>
+</html>
