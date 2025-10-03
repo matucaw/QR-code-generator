@@ -110,7 +110,7 @@ function voltar() {
 function gerarQRCode() {
   let texto = document.getElementById("texto").value;
   // Permitir apenas os caracteres da lista fornecida, incluindo , e .
-  const permitido = /^[qwertyuiopasdfghjklzxcvbnm1234567890@#$_&\-+()\/\*"'`:;!?~`|•√π÷×§∆£¢€¥^°={}%©®™✓[\].,\\]*$/i;
+  const permitido = /^[q wertyuiopasdfghjklzxcvbnm1234567890@#$_&\-+()\/\*"'`:;!?~`|•√π÷×§∆£¢€¥^°={}%©®™✓[\].,\\]*$/i;
   if (!permitido.test(texto)) {
     alert("⚠ Caractere inválido! Use apenas os permitidos na lista.");
     return;
