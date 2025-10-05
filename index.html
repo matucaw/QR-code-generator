@@ -109,8 +109,8 @@ function voltar() {
 
 function gerarQRCode() {
   let texto = document.getElementById("texto").value;
-  // Permitir apenas os caracteres da lista fornecida, incluindo , e .
-  const permitido = /^[q wertyuiopasdfghjklzxcvbnm1234567890@#$_&\-+()\/\*"'`:;!?~`|•√π÷×§∆£¢€¥^°={}%©®™✓[\].,\\]*$/i;
+  // Permitir apenas os caracteres da lista fornecida
+  const permitido = /^[qwertyuiopasdfghjklzxcvbnm1234567890@#$_&\-+()\/\*"'`:;!?~`|•√π÷×§∆£¢€¥^°={}%©®™✓[\].,\\]*$/i;
   if (!permitido.test(texto)) {
     alert("⚠ Caractere inválido! Use apenas os permitidos na lista.");
     return;
@@ -120,9 +120,15 @@ function gerarQRCode() {
   new QRCode(document.getElementById("qrcode"), { text: texto, width: 250, height: 250 });
 
   setTimeout(() => {
-    let img = document.querySelector("#qrcode img");
-    if (img) {
-      let link = document.getElementById("download");
+    let qrDiv = document.getElementById("qrcode");
+    let canvas = qrDiv.querySelector("canvas"); // tenta pegar canvas
+    let img = qrDiv.querySelector("img"); // fallback para img
+    let link = document.getElementById("download");
+
+    if (canvas) {
+      link.href = canvas.toDataURL("image/png"); // garante PNG
+      link.style.display = "block";
+    } else if (img) {
       link.href = img.src;
       link.style.display = "block";
     }
